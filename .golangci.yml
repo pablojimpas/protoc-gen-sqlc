@@ -1,0 +1,130 @@
+run:
+  timeout: 5m
+  tests: true
+  modules-download-mode: readonly
+
+linters:
+  fast: false
+  enable:
+    - asasalint
+    - asciicheck
+    - bidichk
+    - bodyclose
+    - containedctx
+    - contextcheck
+    - cyclop
+    - decorder
+    - dogsled
+    - dupl
+    - dupword
+    - durationcheck
+    - errchkjson
+    - errcheck
+    - errname
+    - errorlint
+    - exhaustive
+    - exportloopref
+    - forbidigo
+    - forcetypeassert
+    - funlen
+    - gocritic
+    - godot
+    - gofmt
+    - gofumpt
+    - goimports
+    - gomoddirectives
+    - gosec
+    - gosimple
+    - govet
+    - ineffassign
+    - misspell
+    - nakedret
+    - nilerr
+    - nilnil
+    - noctx
+    - nolintlint
+    - prealloc
+    - predeclared
+    - promlinter
+    - reassign
+    - revive
+    - rowserrcheck
+    - sqlclosecheck
+    - staticcheck
+    - stylecheck
+    - tenv
+    - testableexamples
+    - thelper
+    - tparallel
+    - unconvert
+    - unparam
+    - unused
+    - usestdlibvars
+    - wastedassign
+
+disable:
+  - depguard
+  - exhaustruct
+  - gci
+  - ginkgolinter
+  - gocheckcompilerdirectives
+  - gochecknoglobals
+  - gochecknoinits
+  - gocognit
+  - goconst
+  - gocyclo
+  - godox
+  - goerr113
+  - goheader
+  - golint
+  - gomnd
+  - gomodguard
+  - goprintffuncname
+  - grouper
+  - ifshort
+  - importas
+  - interfacebloat
+  - ireturn
+  - lll
+  - loggercheck
+  - maintidx
+  - makezero
+  - maligned
+  - musttag
+  - nestif
+  - nlreturn
+  - nonamedreturns
+  - nosnakecase
+  - nosprintfhostport
+  - paralleltest
+  - tagliatelle
+  - testpackage
+  - typecheck
+  - varnamelen
+  - whitespace
+  - wrapcheck
+  - wsl
+
+linters-settings:
+  gofumpt:
+    module-path: github.com/pablojimpas/protoc-gen-sqlc
+    extra-rules: true
+  errcheck:
+    check-type-assertions: true
+    check-blank: true
+  nakedret:
+    max-func-lines: 3
+  tagliatelle:
+    case:
+      rules:
+        json: snake
+        yaml: snake
+        xml: camel
+        bson: camel
+        avro: snake
+        mapstructure: kebab
+
+issues:
+  max-issues-per-linter: 0
+  max-same-issues: 0
+  exclude-use-default: true

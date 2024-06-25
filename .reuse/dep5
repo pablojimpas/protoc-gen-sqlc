@@ -1,0 +1,4 @@
+Format: https://www.debian.org/doc/packaging-manuals/copyright-format/1.0/
+Upstream-Name: protoc-gen-sqlc
+Upstream-Contact: Pablo Jiménez Pascual <pablo@jimpas.me>
+Source: https://github.com/pablojimpas/protoc-gen-sqlc

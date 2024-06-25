@@ -1,0 +1,13 @@
+syntax = "proto3";
+
+package proto.example.v1;
+
+// Document model.
+message Document {
+  string uid = 1;
+  string uri = 2;
+  string media_type = 3;
+  int32 size = 4;
+  // google.protobuf.Timestamp create_time = 5;
+  // google.protobuf.Timestamp update_time = 6;
+}

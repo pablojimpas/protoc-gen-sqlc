@@ -1,0 +1,42 @@
+CREATE TABLE {{.GoIdent.GoName | snakecase}} (
+  {{ $length := len .Fields -}}
+  {{range $i, $e := .Fields -}}
+    {{if eq .Desc.Kind 9 -}}{{.Desc.Name }} text{{end -}}
+    {{if eq .Desc.Kind 5 -}}{{.Desc.Name }} integer{{end -}}
+    {{ $ii := $i | add1 -}}
+    {{if eq $ii $length -}}
+    {{else}},
+  {{end -}}
+  {{end}}
+);
+
+-- name: Get{{.GoIdent.GoName}} :one
+SELECT * FROM {{.GoIdent.GoName | snakecase}}
+WHERE uid = $1 LIMIT 1;
+
+-- name: List{{.GoIdent.GoName}}s :many
+SELECT * FROM {{.GoIdent.GoName | snakecase}};
+
+-- name: Create{{.GoIdent.GoName}} :one
+INSERT INTO {{.GoIdent.GoName | snakecase}} (
+  {{ $length := len .Fields -}}
+  {{range $i, $e := .Fields -}}
+    {{.Desc.Name -}}
+    {{ $ii := $i | add1 -}}
+    {{if eq $ii $length -}}
+    {{else}}, {{end -}}
+  {{end}}
+) VALUES (
+  {{ $length := len .Fields -}}
+  {{range $i, $e := .Fields -}}
+    {{ $ii := $i | add1 -}}
+    ${{$ii -}}
+    {{if eq $ii $length -}}
+    {{else}}, {{end -}}
+  {{end}}
+)
+RETURNING *;
+
+-- name: Delete{{.GoIdent.GoName}} :exec
+DELETE FROM {{.GoIdent.GoName | snakecase}}
+WHERE uid = $1;

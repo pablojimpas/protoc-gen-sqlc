@@ -1,0 +1,10 @@
+version: "2"
+sql:
+  - engine: "postgresql"
+    queries: "./tmp/proto/example/v1/document.pb.sql"
+    schema: "./tmp/proto/example/v1/document.pb.sql"
+    gen:
+      go:
+        package: "example"
+        out: "tmp/example"
+        sql_package: "pgx/v5"

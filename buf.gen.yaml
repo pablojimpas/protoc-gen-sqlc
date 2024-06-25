@@ -1,0 +1,9 @@
+version: v2
+managed:
+  enabled: true
+  override:
+    - file_option: go_package
+      value: proto/example/v1
+plugins:
+  - local: tmp/protoc-gen-sqlc
+    out: tmp
