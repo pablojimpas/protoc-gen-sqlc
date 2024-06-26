@@ -37,6 +37,18 @@ INSERT INTO {{.GoIdent.GoName | snakecase}} (
 )
 RETURNING *;
 
+-- name: Update{{.GoIdent.GoName}} :one
+UPDATE {{.GoIdent.GoName | snakecase}} SET
+  {{ $length := len .Fields -}}
+  {{range $i, $e := .Fields -}}
+    {{ $ii := $i | add1 -}}
+    {{.Desc.Name}} = ${{$ii -}}
+    {{if eq $ii $length -}}
+    {{else}}, {{end -}}
+  {{end}}
+WHERE uid = $1
+RETURNING *;
+
 -- name: Delete{{.GoIdent.GoName}} :exec
 DELETE FROM {{.GoIdent.GoName | snakecase}}
 WHERE uid = $1;
