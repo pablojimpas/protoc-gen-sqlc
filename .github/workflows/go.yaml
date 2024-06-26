@@ -1,0 +1,45 @@
+name: Go
+
+on:
+  push:
+    branches:
+      - master
+    paths:
+      - "**.go"
+      - "go.mod"
+      - "go.sum"
+      - ".golangci.yml"
+      - ".github/**"
+  pull_request:
+    branches:
+      - master
+    paths:
+      - "**.go"
+      - "go.mod"
+      - "go.sum"
+      - ".golangci.yml"
+      - ".github/**"
+
+jobs:
+  quality:
+    name: Code Quality
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Install Go
+        uses: actions/setup-go@v5
+        with:
+          cache: true
+          check-latest: true
+          cache-dependency-path: "go.sum"
+          go-version-file: "go.mod"
+      - name: Lint
+        run: make audit
+      - name: Build
+        run: make build
+      - name: Test
+        run: make test
+      - name: Run
+        run: make sqlc
