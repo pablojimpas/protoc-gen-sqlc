@@ -1,0 +1,19 @@
+syntax = "proto3";
+
+package proto.example.v1;
+
+// User model
+message User {
+  string uid = 1;
+  string username = 2;
+  // Role role = 3;
+  // google.protobuf.Timestamp create_time = 4;
+  // google.protobuf.Timestamp update_time = 5;
+}
+
+enum Role {
+  ROLE_UNSPECIFIED = 0;
+  ROLE_ADMIN = 1;
+  ROLE_MANAGER = 2;
+  ROLE_OPERATOR = 3;
+}

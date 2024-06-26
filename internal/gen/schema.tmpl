@@ -1,0 +1,13 @@
+{{range .Messages}}
+CREATE TABLE {{.GoIdent.GoName | snakecase}}s (
+  {{ $length := len .Fields -}}
+  {{range $i, $e := .Fields -}}
+    {{if eq .Desc.Kind 9 -}}{{.Desc.Name }} text{{end -}}
+    {{if eq .Desc.Kind 5 -}}{{.Desc.Name }} integer{{end -}}
+    {{ $ii := $i | add1 -}}
+    {{if eq $ii $length -}}
+    {{else}},
+  {{end -}}
+  {{end}}
+);
+{{end}}

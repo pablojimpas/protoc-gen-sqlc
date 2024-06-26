@@ -1,8 +1,8 @@
 version: "2"
 sql:
   - engine: "postgresql"
-    queries: "./tmp/proto/example/v1/document.pb.sql"
-    schema: "./tmp/proto/example/v1/document.pb.sql"
+    schema: "./tmp/schema.pb.sql"
+    queries: "./tmp/proto/example/v1/*.pb.sql"
     gen:
       go:
         package: "example"

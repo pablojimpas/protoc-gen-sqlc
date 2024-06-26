@@ -18,8 +18,9 @@ import (
 var files embed.FS
 
 var (
-	headerTmpl  = parse("header.tmpl")
-	messageTmpl = parse("crud.tmpl")
+	headerTmpl = parse("header.tmpl")
+	schemaTmpl = parse("schema.tmpl")
+	crudTmpl   = parse("crud.tmpl")
 )
 
 func parse(file string) *template.Template {
@@ -30,18 +31,46 @@ func parse(file string) *template.Template {
 type Options struct{}
 
 type headerParams struct {
-	*protogen.File
+	Source []*protogen.File
 }
 
-type messageParams struct {
+type schemaParams struct {
+	Messages []*protogen.Message
+	Options
+}
+
+type crudParams struct {
 	*protogen.Message
 	Options
 }
 
 // This function is called with a param which contains the entire definition of a method.
-func ApplyTemplate(w io.Writer, f *protogen.File, opts Options) error {
+func ApplySchemaTemplate(w io.Writer, f []*protogen.File, opts Options) error {
 	if err := headerTmpl.Execute(w, headerParams{
-		File: f,
+		Source: f,
+	}); err != nil {
+		return err
+	}
+
+	var m []*protogen.Message
+	for _, v := range f {
+		m = append(m, v.Messages...)
+	}
+
+	if err := schemaTmpl.Execute(w, schemaParams{
+		Messages: m,
+		Options:  opts,
+	}); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+// This function is called with a param which contains the entire definition of a method.
+func ApplyQueryTemplate(w io.Writer, f *protogen.File, opts Options) error {
+	if err := headerTmpl.Execute(w, headerParams{
+		Source: []*protogen.File{f},
 	}); err != nil {
 		return err
 	}
@@ -57,7 +86,7 @@ func applyMessages(w io.Writer, msgs []*protogen.Message, opts Options) error {
 		}
 
 		log.Printf("Processing %s", m.GoIdent.GoName)
-		if err := messageTmpl.Execute(w, messageParams{
+		if err := crudTmpl.Execute(w, crudParams{
 			Message: m,
 			Options: opts,
 		}); err != nil {
