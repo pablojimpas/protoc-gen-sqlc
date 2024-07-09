@@ -5,57 +5,40 @@
 package main
 
 import (
-	"flag"
 	"fmt"
-	"log"
+	"log/slog"
+	"os"
 
-	"github.com/pablojimpas/protoc-gen-sqlc/internal/gen"
-	"google.golang.org/protobuf/compiler/protogen"
+	"github.com/pablojimpas/protoc-gen-sqlc/internal/converter"
+
+	"google.golang.org/protobuf/proto"
 	"google.golang.org/protobuf/types/pluginpb"
 )
 
 func main() {
-	protogen.Options{
-		ParamFunc: flag.CommandLine.Set,
-	}.Run(func(p *protogen.Plugin) error {
-		p.SupportedFeatures = uint64(pluginpb.CodeGeneratorResponse_FEATURE_PROTO3_OPTIONAL)
-		opts := gen.Options{}
-		generateSchema(p, opts)
-		generateQueries(p, opts)
-		return nil
-	})
-}
-
-func generateSchema(p *protogen.Plugin, opts gen.Options) {
-	log.Println("Generating schema.pb.sql")
-	gf := p.NewGeneratedFile("schema.pb.sql", "")
-
-	err := gen.ApplySchemaTemplate(gf, p.Files, opts)
+	resp, err := converter.ConvertFrom(os.Stdin)
 	if err != nil {
-		gf.Skip()
-		p.Error(err)
+		message := fmt.Sprintf("Failed to read input: %v", err)
+		slog.Error(message)
+		renderResponse(&pluginpb.CodeGeneratorResponse{
+			Error: &message,
+		})
+		os.Exit(1)
 	}
+
+	renderResponse(resp)
 }
 
-func generateQueries(p *protogen.Plugin, opts gen.Options) {
-	for _, name := range p.Request.FileToGenerate {
-		f := p.FilesByPath[name]
+func renderResponse(resp *pluginpb.CodeGeneratorResponse) {
+	data, err := proto.Marshal(resp)
+	if err != nil {
+		slog.Error("failed to marshal response", slog.Any("error", err))
+		return
+	}
 
-		if len(f.Messages) == 0 {
-			log.Printf("Skipping %s, no messages", name)
-			continue
-		}
-
-		log.Printf("Processing %s", name)
-		log.Printf("Generating %s\n", fmt.Sprintf("%s.pb.sql", f.GeneratedFilenamePrefix))
-
-		gf := p.NewGeneratedFile(fmt.Sprintf("%s.pb.sql", f.GeneratedFilenamePrefix), f.GoImportPath)
-
-		err := gen.ApplyQueryTemplate(gf, f, opts)
-		if err != nil {
-			gf.Skip()
-			p.Error(err)
-			continue
-		}
+	_, err = os.Stdout.Write(data)
+	if err != nil {
+		slog.Error("failed to write response", slog.Any("error", err))
+		return
 	}
 }
