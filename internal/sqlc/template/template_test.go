@@ -1,11 +1,15 @@
-package gen_test
+// SPDX-FileCopyrightText: 2024 Pablo Jiménez Pascual <pablo@jimpas.me>
+//
+// SPDX-License-Identifier: BSD-3-Clause
+
+package template_test
 
 import (
 	"bytes"
 	"testing"
 
 	"github.com/pablojimpas/protoc-gen-sqlc/internal/core"
-	"github.com/pablojimpas/protoc-gen-sqlc/internal/gen"
+	"github.com/pablojimpas/protoc-gen-sqlc/internal/sqlc/template"
 )
 
 func TestApplySchemaTemplate(t *testing.T) {
@@ -38,7 +42,7 @@ func TestApplySchemaTemplate(t *testing.T) {
 	}
 
 	var buf bytes.Buffer
-	err := gen.ApplySchemaTemplate(&buf, gen.SchemaParams{schema, gen.Options{}, gen.HeaderParams{}})
+	err := template.ApplySchema(&buf, template.SchemaParams{schema, template.Options{}, template.HeaderParams{}})
 	if err != nil {
 		t.Error(err)
 	}

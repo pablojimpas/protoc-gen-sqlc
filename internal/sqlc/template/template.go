@@ -2,7 +2,7 @@
 //
 // SPDX-License-Identifier: BSD-3-Clause
 
-package gen
+package template
 
 import (
 	"embed"
@@ -47,7 +47,7 @@ type CrudParams struct {
 	HeaderParams
 }
 
-func ApplySchemaTemplate(w io.Writer, p SchemaParams) error {
+func ApplySchema(w io.Writer, p SchemaParams) error {
 	if err := headerTmpl.Execute(w, p.HeaderParams); err != nil {
 		return err
 	}
@@ -55,7 +55,7 @@ func ApplySchemaTemplate(w io.Writer, p SchemaParams) error {
 	return schemaTmpl.Execute(w, p)
 }
 
-func ApplyCrudTemplate(w io.Writer, p CrudParams) error {
+func ApplyCrud(w io.Writer, p CrudParams) error {
 	if err := headerTmpl.Execute(w, p.HeaderParams); err != nil {
 		return err
 	}
