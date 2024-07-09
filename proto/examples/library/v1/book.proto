@@ -1,0 +1,46 @@
+syntax = "proto3";
+
+package examples.library.v1;
+
+import "buf/validate/validate.proto";
+import "google/protobuf/timestamp.proto";
+import "sqlc/sqlc.proto";
+
+message Book {
+  int32 book_id = 1 [(sqlc.field).primary = true];
+  int32 author_id = 2 [
+    (buf.validate.field).required = true,
+    (sqlc.field).references = "authors.author_id"
+  ];
+  string isbn = 3 [
+    (buf.validate.field).required = true,
+    (sqlc.field).unique = true,
+    (sqlc.field).default = 'Unknown'
+  ];
+  BookType book_type = 4 [
+    (buf.validate.field).required = true,
+    (sqlc.field).default = 'FICTION'
+  ];
+  string title = 5 [
+    (buf.validate.field).required = true,
+    (sqlc.field).default = ''
+  ];
+  int32 year = 6 [
+    (buf.validate.field).required = true,
+    (sqlc.field).default = '2000'
+  ];
+  google.protobuf.Timestamp available_time = 7 [
+    (buf.validate.field).required = true,
+    (sqlc.field).default = 'NOW()'
+  ];
+  repeated string tags = 8 [
+    (buf.validate.field).required = true,
+    (sqlc.field).default = '{}'
+  ];
+}
+
+enum BookType {
+  BOOK_TYPE_UNSPECIFIED = 0;
+  BOOK_TYPE_FICTION = 1;
+  BOOK_TYPE_NONFICTION = 2;
+}

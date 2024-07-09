@@ -1,0 +1,17 @@
+syntax = "proto3";
+
+package examples.library.v1;
+
+import "buf/validate/validate.proto";
+import "google/protobuf/struct.proto";
+import "sqlc/sqlc.proto";
+
+message Author {
+  int32 author_id = 1 [(sqlc.field).primary = true];
+  string name = 2 [
+    (buf.validate.field).required = true,
+    (sqlc.field).default = 'Anonymous'
+  ];
+  google.protobuf.Struct biography = 3;
+}
+

@@ -1,0 +1,26 @@
+// SPDX-FileCopyrightText: 2024 Pablo Jiménez Pascual <pablo@jimpas.me>
+//
+// SPDX-License-Identifier: BSD-3-Clause
+
+syntax = "proto3";
+
+package sqlc;
+
+import "google/protobuf/descriptor.proto";
+
+// FieldOptions is an extension to google.protobuf.FieldOptions. It allows
+// the addition of validation rules at the field level. These rules can be
+// applied to incoming messages to ensure they meet certain criteria before
+// being processed.
+extend google.protobuf.FieldOptions {
+  // Rules specify the validations to be performed on this field. By default,
+  // no validation is performed against a field.
+  optional FieldConstraints field = 5001;
+}
+
+message FieldConstraints {
+  bool primary = 1;
+  bool unique = 2;
+  string references = 3;
+  string default = 4;
+}

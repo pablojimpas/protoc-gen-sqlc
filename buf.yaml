@@ -1,10 +1,15 @@
 version: v2
+modules:
+  - path: proto
 deps:
   - buf.build/protocolbuffers/wellknowntypes
   - buf.build/bufbuild/protovalidate
 lint:
   use:
     - DEFAULT
+  ignore_only:
+    PACKAGE_VERSION_SUFFIX:
+      - proto/sqlc/sqlc.proto
 breaking:
   use:
     - FILE
