@@ -1,13 +1,26 @@
-{{range .Messages}}
-CREATE TABLE {{.GoIdent.GoName | snakecase}}s (
-  {{ $length := len .Fields -}}
-  {{range $i, $e := .Fields -}}
-    {{if eq .Desc.Kind 9 -}}{{.Desc.Name }} text{{end -}}
-    {{if eq .Desc.Kind 5 -}}{{.Desc.Name }} integer{{end -}}
-    {{ $ii := $i | add1 -}}
-    {{if eq $ii $length -}}
-    {{else}},
-  {{end -}}
-  {{end}}
+{{- range .Enums }}
+CREATE TYPE {{ .Name }} AS ENUM (
+  {{- $valuesLen := len .Values -}}
+  {{- range $index, $value := .Values }}
+  '{{ $value }}'{{ if ne ($index | add1) ($valuesLen) }}, {{ end }}
+  {{- end }}
 );
-{{end}}
+{{ end }}
+{{- range .Tables }}
+CREATE TABLE {{ .Name }} (
+  {{- $columnsLen := len .Columns -}}
+  {{ $constraintsLen := len .Constraints -}}
+  {{- range $index, $column := .Columns }}
+    {{ $column.Name }} {{ $column.Type }}
+    {{- if $column.NotNull }} NOT NULL{{ end }}
+    {{- if $column.DefaultValue }} DEFAULT {{ $column.DefaultValue }}{{ end }}
+    {{- if or (ne ($index | add1) $columnsLen) ($constraintsLen) }},{{ end }}
+  {{- end }}
+  {{- range $index, $constraint := .Constraints }}
+    {{ $constraint.Type }}({{ $constraint.Columns | join ", " }})
+    {{- if eq $constraint.Type "FOREIGN KEY" }} REFERENCES {{ $constraint.References.Table }}({{ $constraint.References.Columns | join ", " }})
+      {{- if $constraint.References.OnDelete }} ON DELETE {{ $constraint.References.OnDelete }}{{ end }}{{ end }}
+    {{- if ne ($index | add1) $constraintsLen }},{{ end }}
+  {{- end }}
+);
+{{ end }}

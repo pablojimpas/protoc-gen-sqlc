@@ -1,42 +1,35 @@
--- name: Get{{.GoIdent.GoName}} :one
-SELECT * FROM {{.GoIdent.GoName | snakecase}}s
-WHERE uid = $1 LIMIT 1;
+{{- $columnsLen := len .Columns -}}
 
--- name: List{{.GoIdent.GoName}}s :many
-SELECT * FROM {{.GoIdent.GoName | snakecase}}s;
+-- name: Get{{ .GoName }} :one
+SELECT * FROM {{ .Name }}
+WHERE {{ .PrimaryKey }} = $1 LIMIT 1;
 
--- name: Create{{.GoIdent.GoName}} :one
-INSERT INTO {{.GoIdent.GoName | snakecase}}s (
-  {{ $length := len .Fields -}}
-  {{range $i, $e := .Fields -}}
-    {{.Desc.Name -}}
-    {{ $ii := $i | add1 -}}
-    {{if eq $ii $length -}}
-    {{else}}, {{end -}}
-  {{end}}
+-- name: List{{ .GoName }} :many
+SELECT * FROM {{ .Name }}
+ORDER BY {{ .PrimaryKey }};
+
+-- name: Create{{ .GoName }} :one
+INSERT INTO {{ .Name }} (
+  {{ range $index, $column := .Columns }}
+  {{- $column.Name }}{{ if ne ($index | add1) ($columnsLen) }}, {{ end }}
+  {{- end }}
 ) VALUES (
-  {{ $length := len .Fields -}}
-  {{range $i, $e := .Fields -}}
-    {{ $ii := $i | add1 -}}
-    ${{$ii -}}
-    {{if eq $ii $length -}}
-    {{else}}, {{end -}}
-  {{end}}
+  {{ range $index, $column := .Columns -}}
+  ${{ $index | add1 }}{{ if ne ($index | add1) ($columnsLen) }}, {{ end }}
+  {{- end }}
 )
 RETURNING *;
 
--- name: Update{{.GoIdent.GoName}} :one
-UPDATE {{.GoIdent.GoName | snakecase}}s SET
-  {{ $length := len .Fields -}}
-  {{range $i, $e := .Fields -}}
-    {{ $ii := $i | add1 -}}
-    {{.Desc.Name}} = ${{$ii -}}
-    {{if eq $ii $length -}}
-    {{else}}, {{end -}}
-  {{end}}
-WHERE uid = $1
+-- name: Update{{ .GoName }} :one
+UPDATE {{ .Name }} SET
+  {{- range $index, $column := .Columns }}
+  {{- if ne $column.Name $.PrimaryKey }}
+  {{ $column.Name }} = ${{ $index | add1 }}{{ if ne ($index | add1) $columnsLen }}, {{ end }}
+  {{- end }}
+  {{- end }}
+WHERE {{ .PrimaryKey }} = $1
 RETURNING *;
 
--- name: Delete{{.GoIdent.GoName}} :exec
-DELETE FROM {{.GoIdent.GoName | snakecase}}s
-WHERE uid = $1;
+-- name: Delete{{ .GoName }} :exec
+DELETE FROM {{ .Name }}
+WHERE {{ .PrimaryKey }} = $1;
