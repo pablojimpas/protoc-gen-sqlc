@@ -1,7 +1,8 @@
 BUILD_PATH=tmp
 PROTO_PATH=proto
-MAIN_PACKAGE_PATH := ./cmd/protoc-gen-sqlc
-BINARY_NAME := protoc-gen-sqlc
+MAIN_PACKAGE_PATH=./cmd/protoc-gen-sqlc
+BINARY_NAME=protoc-gen-sqlc
+LIBRARY_GEN_CONFIG=examples/library/buf.gen.yaml
 
 .PHONY: help
 help:
@@ -57,7 +58,7 @@ run: build
 ## protoc: compile protocol buffers
 .PHONY: protoc
 protoc: build
-	go run github.com/bufbuild/buf/cmd/buf@v1.34.0 generate
+	go run github.com/bufbuild/buf/cmd/buf@v1.34.0 generate --template $(LIBRARY_GEN_CONFIG) --path $(PROTO_PATH)/examples
 
 ## sqlc: generate idiomatic code from SQL files
 .PHONY: sqlc

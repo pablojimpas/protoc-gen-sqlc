@@ -1,0 +1,9 @@
+version: v2
+managed:
+  enabled: true
+  override:
+    - file_option: go_package
+      value: internal/gen/sqlc/examples/library/v1
+plugins:
+  - local: tmp/protoc-gen-sqlc
+    out: examples/library/internal/gen/sqlc
