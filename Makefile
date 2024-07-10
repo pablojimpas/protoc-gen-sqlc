@@ -46,6 +46,7 @@ test/cover: build
 ## build: build the executable
 .PHONY: build
 build:
+	go run github.com/bufbuild/buf/cmd/buf@v1.34.0 generate --path $(PROTO_PATH)/sqlc
 	go build -o=$(BUILD_PATH)/$(BINARY_NAME) $(MAIN_PACKAGE_PATH)
 
 ## run: run the executable

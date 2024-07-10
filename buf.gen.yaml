@@ -3,7 +3,8 @@ managed:
   enabled: true
   override:
     - file_option: go_package
-      value: proto/example/v1
+      value: internal/gen/sqlcpb
 plugins:
-  - local: tmp/protoc-gen-sqlc
-    out: tmp
+  - remote: buf.build/protocolbuffers/go:v1.31.0
+    out: internal/gen
+    opt: paths=source_relative
