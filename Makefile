@@ -1,8 +1,11 @@
 BUILD_PATH=tmp
+GEN_PATH=internal/gen
 PROTO_PATH=proto
 MAIN_PACKAGE_PATH=./cmd/protoc-gen-sqlc
 BINARY_NAME=protoc-gen-sqlc
-LIBRARY_GEN_CONFIG=examples/library/buf.gen.yaml
+
+LIBRARY_EXAMPLE_PATH=examples/library
+LIBRARY_EXAMPLE_CONFIG=buf.gen.yaml
 
 .PHONY: help
 help:
@@ -58,11 +61,14 @@ run: build
 ## protoc: compile protocol buffers
 .PHONY: protoc
 protoc: build
-	go run github.com/bufbuild/buf/cmd/buf@v1.34.0 generate --template $(LIBRARY_GEN_CONFIG) --path $(PROTO_PATH)/examples
+	go run github.com/bufbuild/buf/cmd/buf@v1.34.0 generate \
+		--template $(LIBRARY_EXAMPLE_PATH)/$(LIBRARY_EXAMPLE_CONFIG) \
+		--path $(PROTO_PATH)/examples
 
 ## sqlc: generate idiomatic code from SQL files
 .PHONY: sqlc
 sqlc: protoc
+	cd $(LIBRARY_EXAMPLE_PATH) && \
 	go run github.com/sqlc-dev/sqlc/cmd/sqlc@latest generate
 
 ## push: push changes to the remote Git repository
@@ -74,3 +80,5 @@ push: clean audit test/cover no-dirty
 .PHONY: clean
 clean:
 	rm -rf $(BUILD_PATH)
+	rm -rf $(GEN_PATH)
+	rm -rf $(LIBRARY_EXAMPLE_PATH)/$(GEN_PATH)
