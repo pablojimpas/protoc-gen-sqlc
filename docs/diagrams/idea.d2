@@ -1,0 +1,71 @@
+direction: right
+
+pb: Protocol Buffers Models\n(.proto) {
+  shape: page
+}
+
+protoc: {
+  protoc-gen-go: {
+    shape: step
+  }
+
+  protoc-gen-go-grpc: {
+    shape: step
+  }
+
+  protoc-gen-sqlc: {
+    shape: step
+  }
+
+  protoc-gen-openapiv2: {
+    shape: step
+  }
+}
+
+sql: SQL\n(.sql) {
+  shape: page
+}
+
+sqlc: {
+  sqlc-gen-go: {
+    shape: step
+  }
+}
+
+go-crud-sql: Persistence CRUD\n(.sql.go, .sql.ts, .sql.py) {
+  shape: page
+  style: {
+    fill: cyan
+  }
+}
+
+go-crud-grpc: Transport CRUD\n(_grpc.pb.go, _grpc.pb.ts, ...) {
+  shape: page
+  style: {
+    fill: cyan
+  }
+}
+
+go-pb: Protocol Buffers\n(.pb.go, .pb.ts, .pb.py) {
+  shape: page
+  style: {
+    fill: cyan
+  }
+}
+
+swagger: {
+  shape: page
+}
+
+pb -> protoc
+protoc.protoc-gen-sqlc -> sql
+sql -> sqlc -> go-crud-sql
+protoc.protoc-gen-go -> go-pb
+protoc.protoc-gen-go-grpc -> go-crud-grpc
+protoc.protoc-gen-openapiv2 -> swagger
+
+go-crud-grpc -> go-pb: {
+  style: {
+    animated: true
+  }
+}

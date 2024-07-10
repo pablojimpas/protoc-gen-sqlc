@@ -1,0 +1,28 @@
+shape: sequence_diagram
+
+main
+
+converter
+
+core
+
+sqlc/template
+
+main -> converter.ConvertFrom: "resp := ConvertFrom(r io.Reader)"
+
+converter.ConvertFrom -> converter.ConvertFrom: "req := proto.Unmarshal"
+
+converter.ConvertFrom.Convert -> converter.ConvertFrom.Convert: "Convert(req)"
+
+"for _, fileDesc := range req.GetProtoFile()": {
+  converter.ConvertFrom.Convert -> core.BuildSchema: "BuildSchema"
+  core.BuildSchema -> converter.ConvertFrom.Convert
+}
+
+converter.ConvertFrom.Convert -> core.GenerateSchema: "GenerateSchema"
+core.GenerateSchema -> sqlc/template.ApplyTemplate: "ApplySchema"
+sqlc/template.ApplyTemplate -> core.GenerateSchema
+core.GenerateSchema -> converter.ConvertFrom.Convert
+
+converter.ConvertFrom -> main: "CodeGeneratorResponse"
+main.renderResponse -> main.renderResponse: "renderResponse(resp)"
