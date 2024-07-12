@@ -80,5 +80,4 @@ push: clean audit test/cover no-dirty
 .PHONY: clean
 clean:
 	rm -rf $(BUILD_PATH)
-	rm -rf $(GEN_PATH)
 	rm -rf $(LIBRARY_EXAMPLE_PATH)/$(GEN_PATH)
