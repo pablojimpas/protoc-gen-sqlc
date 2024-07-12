@@ -20,8 +20,10 @@ func main() {
 		func(p *protogen.Plugin) error {
 			p.SupportedFeatures = uint64(pluginpb.CodeGeneratorResponse_FEATURE_PROTO3_OPTIONAL)
 			opts := template.Options{}
-			converter.GenerateSchema(p, opts)
-			converter.GenerateQueries(p, opts)
+			sb := converter.NewSchemaBuilder()
+			sb.Build(p)
+			converter.GenerateSchema(p, sb.Schema, opts)
+			converter.GenerateQueries(p, sb.Schema, opts)
 			return nil
 		},
 	)

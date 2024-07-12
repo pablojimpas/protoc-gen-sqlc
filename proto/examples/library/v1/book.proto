@@ -10,20 +10,19 @@ message Book {
   int32 book_id = 1 [(sqlc.field).primary = true];
   int32 author_id = 2 [
     (buf.validate.field).required = true,
-    (sqlc.field).references = "authors.author_id"
+    (sqlc.field).references = "Author.author_id"
   ];
   string isbn = 3 [
     (buf.validate.field).required = true,
-    (sqlc.field).unique = true,
-    (sqlc.field).default = 'Unknown'
+    (sqlc.field).unique = true
   ];
   BookType book_type = 4 [
     (buf.validate.field).required = true,
-    (sqlc.field).default = 'FICTION'
+    (sqlc.field).default = 'BOOK_TYPE_FICTION'
   ];
   string title = 5 [
     (buf.validate.field).required = true,
-    (sqlc.field).default = ''
+    (sqlc.field).default = 'Unknown'
   ];
   int32 year = 6 [
     (buf.validate.field).required = true,
@@ -37,6 +36,10 @@ message Book {
     (buf.validate.field).required = true,
     (sqlc.field).default = '{}'
   ];
+  bool published = 9 [
+    (sqlc.field).default = 'false'
+  ];
+  float price = 10;
 }
 
 enum BookType {

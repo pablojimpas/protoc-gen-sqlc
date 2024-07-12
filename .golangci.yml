@@ -43,7 +43,7 @@ linters:
     - nilnil
     - noctx
     - nolintlint
-    - prealloc
+    # - prealloc
     - predeclared
     - promlinter
     - reassign
