@@ -71,6 +71,19 @@ sqlc: protoc
 	cd $(LIBRARY_EXAMPLE_PATH) && \
 	go run github.com/sqlc-dev/sqlc/cmd/sqlc@latest generate
 
+.PHONY: exampledb/up
+exampledb/up:
+	docker compose -f $(LIBRARY_EXAMPLE_PATH)/compose.yml up -d
+
+.PHONY: exampledb/down
+exampledb/down:
+	docker compose -f $(LIBRARY_EXAMPLE_PATH)/compose.yml down
+
+## example/library: run library example
+.PHONY: example/library
+example/library: exampledb/up sqlc
+	cd $(LIBRARY_EXAMPLE_PATH) && go run main.go
+
 ## push: push changes to the remote Git repository
 .PHONY: push
 push: clean sqlc audit test/cover no-dirty
@@ -78,6 +91,6 @@ push: clean sqlc audit test/cover no-dirty
 
 ## clean: clean all generated artifacts
 .PHONY: clean
-clean:
+clean: exampledb/down
 	rm -rf $(BUILD_PATH)
 	rm -rf $(LIBRARY_EXAMPLE_PATH)/$(GEN_PATH)
