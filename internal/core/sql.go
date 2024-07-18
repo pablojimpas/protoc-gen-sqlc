@@ -10,6 +10,15 @@ type Schema struct {
 	Sequences []Sequence
 }
 
+func (s Schema) TableByName(name string) *Table {
+	for i, t := range s.Tables {
+		if t.Name == name {
+			return &s.Tables[i]
+		}
+	}
+	return nil
+}
+
 type Sequence struct {
 	Name      string
 	Start     int
@@ -28,6 +37,15 @@ type Table struct {
 	Columns     []Column
 	Constraints []Constraint
 	Indexes     []Index
+}
+
+func (s Table) PrimaryKey() string {
+	for _, c := range s.Constraints {
+		if c.Type == PrimaryKeyConstraint {
+			return c.Columns[0]
+		}
+	}
+	return "id"
 }
 
 type Index struct {
