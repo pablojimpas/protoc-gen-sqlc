@@ -73,7 +73,7 @@ sqlc: protoc
 
 ## push: push changes to the remote Git repository
 .PHONY: push
-push: clean audit test/cover no-dirty
+push: clean sqlc audit test/cover no-dirty
 	git push
 
 ## clean: clean all generated artifacts
