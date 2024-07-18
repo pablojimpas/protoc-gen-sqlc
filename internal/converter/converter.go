@@ -142,8 +142,9 @@ func buildConstraints(m *protogen.Message) []core.Constraint {
 				Type:    core.ForeignKeyConstraint,
 				Columns: []string{string(field.Desc.Name())},
 				References: &core.Reference{
-					Table:   parts[0],
-					Columns: []string{parts[1]},
+					Table:    parts[0],
+					Columns:  []string{parts[1]},
+					OnDelete: "CASCADE",
 				},
 			})
 		}
