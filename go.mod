@@ -3,7 +3,7 @@ module github.com/pablojimpas/protoc-gen-sqlc
 go 1.22.4
 
 require (
-	buf.build/gen/go/bufbuild/protovalidate/protocolbuffers/go v1.34.2-20240508200655-46a4cf4ba109.2
+	buf.build/gen/go/bufbuild/protovalidate/protocolbuffers/go v1.34.2-20240717164558-a6c49f84cc0f.2
 	github.com/Masterminds/sprig/v3 v3.2.3
 	github.com/jackc/pgx/v5 v5.6.0
 	google.golang.org/protobuf v1.34.2
