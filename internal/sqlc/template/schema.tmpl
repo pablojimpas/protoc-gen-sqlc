@@ -1,5 +1,5 @@
 {{- range .Enums }}
-CREATE TYPE {{ .Name }} AS ENUM (
+CREATE TYPE "{{ .Name }}" AS ENUM (
   {{- $valuesLen := len .Values -}}
   {{- range $index, $value := .Values }}
   '{{ $value }}'{{ if ne ($index | add1) ($valuesLen) }}, {{ end }}
@@ -7,11 +7,11 @@ CREATE TYPE {{ .Name }} AS ENUM (
 );
 {{ end }}
 {{- range .Tables }}
-CREATE TABLE {{ .Name }} (
+CREATE TABLE "{{ .Name }}" (
   {{- $columnsLen := len .Columns -}}
   {{ $constraintsLen := len .Constraints -}}
   {{- range $index, $column := .Columns }}
-    {{ $column.Name }} {{ $column.Type }}
+    "{{ $column.Name }}" {{ $column.Type }}
     {{- if $column.NotNull }} NOT NULL{{ end }}
     {{- if $column.DefaultValue }} DEFAULT {{ $column.DefaultValue }}{{ end }}
     {{- if or (ne ($index | add1) $columnsLen) ($constraintsLen) }},{{ end }}

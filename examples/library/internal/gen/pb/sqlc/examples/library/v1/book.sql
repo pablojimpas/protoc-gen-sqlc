@@ -3,35 +3,45 @@
 --    examples/library/v1/book.proto
 --    
 -- name: GetBook :one
-SELECT * FROM Book
-WHERE book_id = $1 LIMIT 1;
+SELECT * FROM "Book"
+WHERE "book_id" = $1 LIMIT 1;
 
 -- name: ListBook :many
-SELECT * FROM Book
-ORDER BY book_id;
+SELECT * FROM "Book"
+ORDER BY "book_id";
 
 -- name: CreateBook :one
-INSERT INTO Book (
-  book_id, author_id, isbn, book_type, title, year, available_time, tags, published, price
+INSERT INTO "Book" (
+  
+  "book_id", 
+  "author_id", 
+  "isbn", 
+  "book_type", 
+  "title", 
+  "year", 
+  "available_time", 
+  "tags", 
+  "published", 
+  "price"
 ) VALUES (
   $1, $2, $3, $4, $5, $6, $7, $8, $9, $10
 )
 RETURNING *;
 
 -- name: UpdateBook :one
-UPDATE Book SET
-  author_id = $2, 
-  isbn = $3, 
-  book_type = $4, 
-  title = $5, 
-  year = $6, 
-  available_time = $7, 
-  tags = $8, 
-  published = $9, 
-  price = $10
-WHERE book_id = $1
+UPDATE "Book" SET
+  "author_id" = $2, 
+  "isbn" = $3, 
+  "book_type" = $4, 
+  "title" = $5, 
+  "year" = $6, 
+  "available_time" = $7, 
+  "tags" = $8, 
+  "published" = $9, 
+  "price" = $10
+WHERE "book_id" = $1
 RETURNING *;
 
 -- name: DeleteBook :exec
-DELETE FROM Book
-WHERE book_id = $1;
+DELETE FROM "Book"
+WHERE "book_id" = $1;
