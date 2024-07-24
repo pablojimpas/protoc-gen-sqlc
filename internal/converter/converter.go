@@ -110,6 +110,9 @@ func getExtensions(opts protoreflect.ProtoMessage, c *core.Column) {
 		if ok {
 			c.NotNull = c.NotNull || ext.Required
 		}
+		if ext.GetString_().GetUuid() {
+			c.Type = core.UUIDType
+		}
 	}
 }
 
