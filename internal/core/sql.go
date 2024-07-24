@@ -67,7 +67,7 @@ const (
 	TextType         ColumnType = "TEXT"
 	SerialType       ColumnType = "SERIAL"
 	DateType         ColumnType = "DATE"
-	TimestampType    ColumnType = "TIMESTAMP"
+	TimestampType    ColumnType = "TIMESTAMPTZ"
 	VarcharType      ColumnType = "VARCHAR"
 	VarcharArrayType ColumnType = "VARCHAR[]"
 	TextArrayType    ColumnType = "TEXT[]"
