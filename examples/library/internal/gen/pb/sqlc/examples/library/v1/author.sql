@@ -3,31 +3,28 @@
 --    examples/library/v1/author.proto
 --    
 -- name: GetAuthor :one
-SELECT * FROM "Author"
-WHERE "author_id" = $1 LIMIT 1;
+SELECT * FROM Author
+WHERE author_id = $1 LIMIT 1;
 
 -- name: ListAuthor :many
-SELECT * FROM "Author"
-ORDER BY "author_id";
+SELECT * FROM Author
+ORDER BY author_id;
 
 -- name: CreateAuthor :one
-INSERT INTO "Author" (
-  
-  "author_id", 
-  "name", 
-  "biography"
+INSERT INTO Author (
+  author_id, name, biography
 ) VALUES (
   $1, $2, $3
 )
 RETURNING *;
 
 -- name: UpdateAuthor :one
-UPDATE "Author" SET
-  "name" = $2, 
-  "biography" = $3
-WHERE "author_id" = $1
+UPDATE Author SET
+  name = $2, 
+  biography = $3
+WHERE author_id = $1
 RETURNING *;
 
 -- name: DeleteAuthor :exec
-DELETE FROM "Author"
-WHERE "author_id" = $1;
+DELETE FROM Author
+WHERE author_id = $1;

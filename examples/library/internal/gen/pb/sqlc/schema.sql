@@ -2,30 +2,30 @@
 -- source:
 --    
 
-CREATE TYPE "BookType" AS ENUM (
+CREATE TYPE BookType AS ENUM (
   'BOOK_TYPE_UNSPECIFIED', 
   'BOOK_TYPE_FICTION', 
   'BOOK_TYPE_NONFICTION'
 );
 
-CREATE TABLE "Author" (
-    "author_id" INTEGER NOT NULL,
-    "name" TEXT NOT NULL DEFAULT 'Anonymous',
-    "biography" JSONB,
+CREATE TABLE Author (
+    author_id INTEGER NOT NULL,
+    name TEXT NOT NULL DEFAULT 'Anonymous',
+    biography JSONB,
     PRIMARY KEY(author_id)
 );
 
-CREATE TABLE "Book" (
-    "book_id" INTEGER NOT NULL,
-    "author_id" INTEGER NOT NULL,
-    "isbn" TEXT NOT NULL,
-    "book_type" BookType NOT NULL DEFAULT 'BOOK_TYPE_FICTION',
-    "title" TEXT NOT NULL DEFAULT 'Unknown',
-    "year" INTEGER NOT NULL DEFAULT 2000,
-    "available_time" TIMESTAMPTZ NOT NULL DEFAULT 'NOW()',
-    "tags" TEXT[] NOT NULL DEFAULT '{}',
-    "published" BOOLEAN DEFAULT false,
-    "price" FLOAT,
+CREATE TABLE Book (
+    book_id INTEGER NOT NULL,
+    author_id INTEGER NOT NULL,
+    isbn TEXT NOT NULL,
+    book_type BookType NOT NULL DEFAULT 'BOOK_TYPE_FICTION',
+    title TEXT NOT NULL DEFAULT 'Unknown',
+    year INTEGER NOT NULL DEFAULT 2000,
+    available_time TIMESTAMPTZ NOT NULL DEFAULT 'NOW()',
+    tags TEXT[] NOT NULL DEFAULT '{}',
+    published BOOLEAN DEFAULT false,
+    price FLOAT,
     PRIMARY KEY(book_id),
     FOREIGN KEY(author_id) REFERENCES Author(author_id) ON DELETE CASCADE,
     UNIQUE(isbn)

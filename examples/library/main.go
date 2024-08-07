@@ -88,7 +88,7 @@ func run() error {
 		BookID:        1,
 		AuthorID:      fetchedAuthor.AuthorID,
 		Isbn:          "ABC123",
-		BookType:      example.BookTypeBOOKTYPENONFICTION,
+		BookType:      example.BooktypeBOOKTYPENONFICTION,
 		Title:         "The C Programming Language",
 		Year:          1983,
 		AvailableTime: pgtype.Timestamptz{Time: time.Now(), Valid: true},

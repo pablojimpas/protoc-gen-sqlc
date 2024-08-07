@@ -1,17 +1,17 @@
 {{- $columnsLen := len .Columns -}}
 
 -- name: Get{{ .GoName }} :one
-SELECT * FROM "{{ .Name }}"
-WHERE "{{ .PrimaryKey }}" = $1 LIMIT 1;
+SELECT * FROM {{ .Name }}
+WHERE {{ .PrimaryKey }} = $1 LIMIT 1;
 
 -- name: List{{ .GoName }} :many
-SELECT * FROM "{{ .Name }}"
-ORDER BY "{{ .PrimaryKey }}";
+SELECT * FROM {{ .Name }}
+ORDER BY {{ .PrimaryKey }};
 
 -- name: Create{{ .GoName }} :one
-INSERT INTO "{{ .Name }}" (
+INSERT INTO {{ .Name }} (
   {{ range $index, $column := .Columns }}
-  "{{- $column.Name }}"{{ if ne ($index | add1) ($columnsLen) }}, {{ end }}
+  {{- $column.Name }}{{ if ne ($index | add1) ($columnsLen) }}, {{ end }}
   {{- end }}
 ) VALUES (
   {{ range $index, $column := .Columns -}}
@@ -21,15 +21,15 @@ INSERT INTO "{{ .Name }}" (
 RETURNING *;
 
 -- name: Update{{ .GoName }} :one
-UPDATE "{{ .Name }}" SET
+UPDATE {{ .Name }} SET
   {{- range $index, $column := .Columns }}
   {{- if ne $column.Name $.PrimaryKey }}
-  "{{ $column.Name }}" = ${{ $index | add1 }}{{ if ne ($index | add1) $columnsLen }}, {{ end }}
+  {{ $column.Name }} = ${{ $index | add1 }}{{ if ne ($index | add1) $columnsLen }}, {{ end }}
   {{- end }}
   {{- end }}
-WHERE "{{ .PrimaryKey }}" = $1
+WHERE {{ .PrimaryKey }} = $1
 RETURNING *;
 
 -- name: Delete{{ .GoName }} :exec
-DELETE FROM "{{ .Name }}"
-WHERE "{{ .PrimaryKey }}" = $1;
+DELETE FROM {{ .Name }}
+WHERE {{ .PrimaryKey }} = $1;
