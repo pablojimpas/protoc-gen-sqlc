@@ -7,6 +7,7 @@ package main
 import (
 	"context"
 	"embed"
+	"fmt"
 	"io/fs"
 	"log"
 	"reflect"
@@ -35,7 +36,9 @@ func run() error {
 	if err != nil {
 		return err
 	}
-	conn.Exec(ctx, string(buf))
+	if _, err := conn.Exec(ctx, string(buf)); err != nil {
+		return fmt.Errorf("failed to execute initial schema: %w", err)
+	}
 
 	// list all authors
 	authors, err := queries.ListAuthor(ctx)
