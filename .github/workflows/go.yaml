@@ -10,6 +10,7 @@ on:
       - "go.sum"
       - ".golangci.yml"
       - ".github/**"
+      - "Makefile"
   pull_request:
     branches:
       - master
@@ -19,6 +20,7 @@ on:
       - "go.sum"
       - ".golangci.yml"
       - ".github/**"
+      - "Makefile"
 
 jobs:
   quality:
