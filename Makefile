@@ -71,10 +71,12 @@ sqlc: protoc
 	cd $(LIBRARY_EXAMPLE_PATH) && \
 	go run github.com/sqlc-dev/sqlc/cmd/sqlc@latest generate
 
+## exampledb/up: start PostgreSQL container used for the example
 .PHONY: exampledb/up
 exampledb/up:
 	docker compose -f $(LIBRARY_EXAMPLE_PATH)/compose.yml up -d
 
+## exampledb/down: stop PostgreSQL container used for the example
 .PHONY: exampledb/down
 exampledb/down:
 	docker compose -f $(LIBRARY_EXAMPLE_PATH)/compose.yml down
