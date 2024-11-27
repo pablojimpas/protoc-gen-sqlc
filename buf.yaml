@@ -6,7 +6,7 @@ deps:
   - buf.build/bufbuild/protovalidate
 lint:
   use:
-    - DEFAULT
+    - STANDARD
   ignore_only:
     PACKAGE_VERSION_SUFFIX:
       - proto/sqlc/sqlc.proto

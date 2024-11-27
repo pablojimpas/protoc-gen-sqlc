@@ -23,7 +23,7 @@ linters:
     - errname
     - errorlint
     - exhaustive
-    - exportloopref
+    - copyloopvar
     - forbidigo
     - forcetypeassert
     - funlen

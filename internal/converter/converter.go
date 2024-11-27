@@ -108,7 +108,7 @@ func getExtensions(opts protoreflect.ProtoMessage, c *core.Column) {
 	if proto.HasExtension(opts, validate.E_Field) {
 		ext, ok := proto.GetExtension(opts, validate.E_Field).(*validate.FieldConstraints)
 		if ok {
-			c.NotNull = c.NotNull || ext.Required
+			c.NotNull = c.NotNull || *ext.Required
 		}
 		if ext.GetString_().GetUuid() {
 			c.Type = core.UUIDType

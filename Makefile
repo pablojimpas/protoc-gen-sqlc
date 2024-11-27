@@ -7,6 +7,11 @@ BINARY_NAME=protoc-gen-sqlc
 LIBRARY_EXAMPLE_PATH=examples/library
 LIBRARY_EXAMPLE_CONFIG=buf.gen.yaml
 
+BUF_VERSION=v1.47.2
+SQLC_VERSION=v1.27.0
+GOLANGCILINT_VERSION=v1.62.2
+PROTOC_GEN_GO_VERSION=v1.35.2
+
 .PHONY: help
 help:
 	@echo 'Build scripts for $(BINARY_NAME)'
@@ -33,8 +38,8 @@ audit: tidy
 	go vet ./...
 	go test -v -race -failfast -buildvcs -vet=off ./...
 	go run golang.org/x/vuln/cmd/govulncheck@latest ./...
-	go run github.com/golangci/golangci-lint/cmd/golangci-lint@v1.59.1 run ./...
-	go run github.com/bufbuild/buf/cmd/buf@v1.34.0 lint
+	go run github.com/golangci/golangci-lint/cmd/golangci-lint@$(GOLANGCILINT_VERSION) run ./...
+	go run github.com/bufbuild/buf/cmd/buf@$(BUF_VERSION) lint
 
 ## test: run all tests
 .PHONY: test
@@ -49,8 +54,8 @@ test/cover: build
 
 ## build: build the executable
 .PHONY: build
-build:
-	go run github.com/bufbuild/buf/cmd/buf@v1.34.0 generate --path $(PROTO_PATH)/sqlc
+build: protoc-gen-go
+	go run github.com/bufbuild/buf/cmd/buf@$(BUF_VERSION) generate --path $(PROTO_PATH)/sqlc
 	go build -o=$(BUILD_PATH)/$(BINARY_NAME) $(MAIN_PACKAGE_PATH)
 
 ## run: run the executable
@@ -61,15 +66,18 @@ run: build
 ## protoc: compile protocol buffers
 .PHONY: protoc
 protoc: build
-	go run github.com/bufbuild/buf/cmd/buf@v1.34.0 generate \
+	go run github.com/bufbuild/buf/cmd/buf@$(BUF_VERSION) generate \
 		--template $(LIBRARY_EXAMPLE_PATH)/$(LIBRARY_EXAMPLE_CONFIG) \
 		--path $(PROTO_PATH)/examples
+
+protoc-gen-go:
+	go install google.golang.org/protobuf/cmd/protoc-gen-go@$(PROTOC_GEN_GO_VERSION)
 
 ## sqlc: generate idiomatic code from SQL files
 .PHONY: sqlc
 sqlc: protoc
 	cd $(LIBRARY_EXAMPLE_PATH) && \
-	go run github.com/sqlc-dev/sqlc/cmd/sqlc@latest generate
+	go run github.com/sqlc-dev/sqlc/cmd/sqlc@$(SQLC_VERSION) generate
 
 ## exampledb/up: start PostgreSQL container used for the example
 .PHONY: exampledb/up

@@ -5,6 +5,6 @@ managed:
     - file_option: go_package
       value: internal/gen/sqlcpb
 plugins:
-  - remote: buf.build/protocolbuffers/go:v1.31.0
+  - local: protoc-gen-go
     out: internal/gen
     opt: paths=source_relative
