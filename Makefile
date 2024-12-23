@@ -48,7 +48,7 @@ test:
 
 ## test/cover: run all tests and display coverage
 .PHONY: test/cover
-test/cover: build
+test/cover:
 	go test -v -race -buildvcs -coverprofile=$(BUILD_PATH)/coverage.out ./...
 	go tool cover -html=$(BUILD_PATH)/coverage.out
 
