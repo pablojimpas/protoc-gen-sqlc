@@ -3,10 +3,10 @@ module github.com/pablojimpas/protoc-gen-sqlc
 go 1.22.4
 
 require (
-	buf.build/gen/go/bufbuild/protovalidate/protocolbuffers/go v1.35.2-20241127180247-a33202765966.1
+	buf.build/gen/go/bufbuild/protovalidate/protocolbuffers/go v1.36.0-20241127180247-a33202765966.1
 	github.com/Masterminds/sprig/v3 v3.3.0
-	github.com/jackc/pgx/v5 v5.7.1
-	google.golang.org/protobuf v1.35.2
+	github.com/jackc/pgx/v5 v5.7.2
+	google.golang.org/protobuf v1.36.1
 )
 
 require (
@@ -20,7 +20,7 @@ require (
 	github.com/mitchellh/copystructure v1.2.0 // indirect
 	github.com/mitchellh/reflectwalk v1.0.2 // indirect
 	github.com/shopspring/decimal v1.4.0 // indirect
-	github.com/spf13/cast v1.7.0 // indirect
-	golang.org/x/crypto v0.29.0 // indirect
-	golang.org/x/text v0.20.0 // indirect
+	github.com/spf13/cast v1.7.1 // indirect
+	golang.org/x/crypto v0.31.0 // indirect
+	golang.org/x/text v0.21.0 // indirect
 )
