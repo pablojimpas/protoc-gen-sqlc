@@ -99,6 +99,12 @@ example/library: exampledb/up sqlc
 push: clean sqlc audit test/cover no-dirty
 	git push
 
+## upgrade: upgrade Go dependencies
+.PHONY: upgrade
+upgrade:
+	go get -u -t ./...
+	go mod tidy -v
+
 ## clean: clean all generated artifacts
 .PHONY: clean
 clean: exampledb/down
