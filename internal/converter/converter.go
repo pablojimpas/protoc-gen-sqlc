@@ -217,7 +217,7 @@ func applyExtensions(opts protoreflect.ProtoMessage, column *core.Column) error 
 			column.NotNull = column.NotNull || ext.GetRequired()
 
 			// Check for UUID type
-			stringRules := ext.GetString_()
+			stringRules := ext.GetString()
 			if stringRules != nil && stringRules.GetUuid() {
 				column.Type = core.UUIDType
 			}
