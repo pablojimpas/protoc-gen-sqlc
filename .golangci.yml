@@ -1,130 +1,132 @@
+# yaml-language-server: $schema=https://golangci-lint.run/jsonschema/golangci.jsonschema.json
+
+version: "2"
+
 run:
-  timeout: 5m
-  tests: true
+  timeout: 2m
   modules-download-mode: readonly
 
+issues:
+  max-issues-per-linter: 0
+  max-same-issues: 0
+
+formatters:
+  enable:
+    - gci
+    - gofmt
+    - gofumpt
+    - goimports
+    - golines
+  settings:
+    gci:
+      sections:
+        - standard
+        - default
+        - localmodule
+    gofumpt:
+      module-path: github.com/pablojimpas/protoc-gen-sqlc
+      extra-rules: true
+
 linters:
-  fast: false
+  default: none
   enable:
     - asasalint
     - asciicheck
     - bidichk
     - bodyclose
+    - canonicalheader
     - containedctx
     - contextcheck
+    - copyloopvar
     - cyclop
-    - decorder
     - dogsled
-    - dupl
-    - dupword
     - durationcheck
-    - errchkjson
     - errcheck
+    - errchkjson
     - errname
     - errorlint
     - exhaustive
-    - copyloopvar
+    - exptostd
+    - fatcontext
     - forbidigo
-    - forcetypeassert
     - funlen
+    - gocheckcompilerdirectives
+    - gochecknoglobals
+    - gochecknoinits
+    - gocognit
+    - goconst
     - gocritic
     - godot
-    - gofmt
-    - gofumpt
-    - goimports
-    - gomoddirectives
+    - goprintffuncname
     - gosec
-    - gosimple
     - govet
+    - grouper
+    - iface
+    - importas
+    - inamedparam
     - ineffassign
+    - interfacebloat
+    - intrange
+    - ireturn
+    - lll
+    - maintidx
+    - makezero
+    - mirror
     - misspell
+    - mnd
+    - musttag
     - nakedret
-    - nilerr
+    - nestif
+    - nilnesserr
     - nilnil
+    - nlreturn
     - noctx
     - nolintlint
-    # - prealloc
+    - paralleltest
+    - perfsprint
+    - prealloc
     - predeclared
-    - promlinter
+    - protogetter
     - reassign
+    - recvcheck
     - revive
     - rowserrcheck
+    - sloglint
     - sqlclosecheck
     - staticcheck
-    - stylecheck
-    - tenv
+    - tagalign
+    - tagliatelle
     - testableexamples
+    - testifylint
+    - testpackage
     - thelper
     - tparallel
     - unconvert
     - unparam
     - unused
     - usestdlibvars
+    - usetesting
     - wastedassign
-
-disable:
-  - depguard
-  - exhaustruct
-  - gci
-  - ginkgolinter
-  - gocheckcompilerdirectives
-  - gochecknoglobals
-  - gochecknoinits
-  - gocognit
-  - goconst
-  - gocyclo
-  - godox
-  - goerr113
-  - goheader
-  - golint
-  - gomnd
-  - gomodguard
-  - goprintffuncname
-  - grouper
-  - ifshort
-  - importas
-  - interfacebloat
-  - ireturn
-  - lll
-  - loggercheck
-  - maintidx
-  - makezero
-  - maligned
-  - musttag
-  - nestif
-  - nlreturn
-  - nonamedreturns
-  - nosnakecase
-  - nosprintfhostport
-  - paralleltest
-  - tagliatelle
-  - testpackage
-  - typecheck
-  - varnamelen
-  - whitespace
-  - wrapcheck
-  - wsl
-
-linters-settings:
-  gofumpt:
-    module-path: github.com/pablojimpas/protoc-gen-sqlc
-    extra-rules: true
-  errcheck:
-    check-type-assertions: true
-    check-blank: true
-  nakedret:
-    max-func-lines: 3
-  tagliatelle:
-    case:
-      rules:
-        json: snake
-        yaml: snake
-        xml: camel
-        bson: camel
-        avro: snake
-        mapstructure: kebab
-
-issues:
-  max-issues-per-linter: 0
-  max-same-issues: 0
-  exclude-use-default: true
+    - whitespace
+    - wsl
+  settings:
+    errcheck:
+      check-type-assertions: true
+      check-blank: true
+    gocritic:
+      enabled-tags:
+        - diagnostic
+        - experimental
+        - opinionated
+        - performance
+        - style
+    nakedret:
+      max-func-lines: 3
+  exclusions:
+    presets:
+      - comments
+      - common-false-positives
+      - legacy
+      - std-error-handling
+    paths:
+      - examples
