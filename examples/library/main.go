@@ -15,6 +15,7 @@ import (
 
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgtype"
+
 	example "github.com/pablojimpas/protoc-gen-sqlc/examples/library/internal/gen/sqlc"
 )
 
@@ -36,6 +37,7 @@ func run() error {
 	if err != nil {
 		return err
 	}
+
 	if _, err := conn.Exec(ctx, string(buf)); err != nil {
 		return fmt.Errorf("failed to execute initial schema: %w", err)
 	}
@@ -45,6 +47,7 @@ func run() error {
 	if err != nil {
 		return err
 	}
+
 	log.Println("Authors list:")
 	log.Println(authors)
 
@@ -64,6 +67,7 @@ func run() error {
 	if err != nil {
 		return err
 	}
+
 	log.Println("Inserted Author:")
 	log.Println(insertedAuthor)
 
@@ -72,6 +76,7 @@ func run() error {
 	if err != nil {
 		return err
 	}
+
 	log.Println("Authors list:")
 	log.Println(authors)
 
@@ -96,12 +101,14 @@ func run() error {
 		Published:     pgtype.Bool{Bool: true, Valid: true},
 		Price:         pgtype.Float8{Float64: 19.99, Valid: true},
 	})
+
 	log.Println("Inserted book")
 	log.Println(book)
 
 	if err = queries.DeleteAuthor(ctx, bob.AuthorID); err != nil {
 		return err
 	}
+
 	if err = queries.DeleteAuthor(ctx, insertedAuthor.AuthorID); err != nil {
 		return nil
 	}

@@ -27,7 +27,7 @@ CREATE TABLE Book (
     published BOOLEAN DEFAULT false,
     price FLOAT,
     PRIMARY KEY(book_id),
-    FOREIGN KEY(author_id) REFERENCES Author(author_id) ON DELETE CASCADE,
+    FOREIGN KEY(author_id) REFERENCES Author(author_id) ON DELETE NO ACTION,
     UNIQUE(isbn)
 );
 

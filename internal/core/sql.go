@@ -10,12 +10,13 @@ type Schema struct {
 	Sequences []Sequence
 }
 
-func (s Schema) TableByName(name string) *Table {
+func (s *Schema) TableByName(name string) *Table {
 	for i, t := range s.Tables {
 		if t.Name == name {
 			return &s.Tables[i]
 		}
 	}
+
 	return nil
 }
 
@@ -39,12 +40,13 @@ type Table struct {
 	Indexes     []Index
 }
 
-func (s Table) PrimaryKey() string {
+func (s *Table) PrimaryKey() string {
 	for _, c := range s.Constraints {
 		if c.Type == PrimaryKeyConstraint {
 			return c.Columns[0]
 		}
 	}
+
 	return "id"
 }
 
@@ -95,5 +97,16 @@ const (
 type Reference struct {
 	Table    string
 	Columns  []string
-	OnDelete string
+	OnDelete ForeignKeyAction
+	OnUpdate ForeignKeyAction
 }
+
+type ForeignKeyAction string
+
+const (
+	ForeignKeyActionNoAction   ForeignKeyAction = "NO ACTION"
+	ForeignKeyActionRestrict   ForeignKeyAction = "RESTRICT"
+	ForeignKeyActionCascade    ForeignKeyAction = "CASCADE"
+	ForeignKeyActionSetNull    ForeignKeyAction = "SET NULL"
+	ForeignKeyActionSetDefault ForeignKeyAction = "SET DEFAULT"
+)

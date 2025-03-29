@@ -2,73 +2,137 @@
 //
 // SPDX-License-Identifier: BSD-3-Clause
 
+// Package converter transforms Protocol Buffer definitions into SQL schemas and queries.
 package converter
 
 import (
+	"errors"
 	"fmt"
 	"log/slog"
 	"strings"
 
 	"buf.build/gen/go/bufbuild/protovalidate/protocolbuffers/go/buf/validate"
-	"github.com/pablojimpas/protoc-gen-sqlc/internal/core"
-	sqlcpb "github.com/pablojimpas/protoc-gen-sqlc/internal/gen/sqlc"
-	"github.com/pablojimpas/protoc-gen-sqlc/internal/sqlc/template"
 	"google.golang.org/protobuf/compiler/protogen"
 	"google.golang.org/protobuf/proto"
 	"google.golang.org/protobuf/reflect/protoreflect"
+
+	"github.com/pablojimpas/protoc-gen-sqlc/internal/core"
+	sqlcpb "github.com/pablojimpas/protoc-gen-sqlc/internal/gen/sqlc"
+	"github.com/pablojimpas/protoc-gen-sqlc/internal/sqlc/template"
 )
 
-var FilesByMessage = make(map[string]*protogen.File)
+const (
+	// Number of parts expected in a "references" string. (table.column).
+	referencesPartCount = 2
+)
 
+var (
+	ErrNilEnum       = errors.New("nil enum provided")
+	ErrNilMessage    = errors.New("nil message provided")
+	ErrNilOptions    = errors.New("nil options provided")
+	ErrTableNotFound = errors.New("table not found")
+)
+
+// SchemaBuilder transforms protobuf definitions into SQL schema structures.
 type SchemaBuilder struct {
-	Schema core.Schema
+	Schema         core.Schema
+	FilesByMessage map[string]*protogen.File
 }
 
+// NewSchemaBuilder creates a new SchemaBuilder with initialized fields.
 func NewSchemaBuilder() *SchemaBuilder {
 	return &SchemaBuilder{
-		Schema: core.Schema{},
+		Schema:         core.Schema{},
+		FilesByMessage: make(map[string]*protogen.File),
 	}
 }
 
-func (sb *SchemaBuilder) Build(p *protogen.Plugin) {
-	for _, name := range p.Request.FileToGenerate {
+// Build processes all proto files in the plugin request to build a complete schema.
+func (sb *SchemaBuilder) Build(p *protogen.Plugin) error {
+	if p == nil {
+		return errors.New("nil plugin provided")
+	}
+
+	for _, name := range p.Request.GetFileToGenerate() {
 		f := p.FilesByPath[name]
 
 		if len(f.Messages) == 0 {
 			slog.Debug("skip generating file because it has no messages", slog.String("name", name))
+
 			continue
 		}
 
 		slog.Debug("processing file", slog.String("name", name))
 
 		for _, enum := range f.Enums {
-			sb.BuildEnum(enum)
+			if err := sb.buildEnum(enum); err != nil {
+				slog.Warn(
+					"failed to build enum",
+					slog.String("name", string(enum.Desc.Name())),
+					slog.String("error", err.Error()),
+				)
+
+				continue
+			}
 		}
 
 		for _, message := range f.Messages {
-			FilesByMessage[string(message.Desc.Name())] = f
-			sb.BuildMessage(message)
+			sb.FilesByMessage[string(message.Desc.Name())] = f
+
+			if err := sb.buildMessage(message); err != nil {
+				slog.Warn(
+					"failed to build message",
+					slog.String("name", string(message.Desc.Name())),
+					slog.String("error", err.Error()),
+				)
+
+				continue
+			}
 		}
 	}
+
+	return nil
 }
 
-func (sb *SchemaBuilder) BuildEnum(m *protogen.Enum) {
-	var values []string
-	for _, v := range m.Values {
+// buildEnum converts a protobuf enum to a SQL enum.
+func (sb *SchemaBuilder) buildEnum(protoEnum *protogen.Enum) error {
+	if protoEnum == nil {
+		return ErrNilEnum
+	}
+
+	values := make([]string, 0, len(protoEnum.Values))
+	for _, v := range protoEnum.Values {
 		values = append(values, string(v.Desc.Name()))
 	}
+
 	enum := core.Enum{
-		Name:   m.GoIdent.GoName,
+		Name:   protoEnum.GoIdent.GoName,
 		Values: values,
 	}
 
 	sb.Schema.Enums = append(sb.Schema.Enums, enum)
+
+	return nil
 }
 
-func (sb *SchemaBuilder) BuildMessage(m *protogen.Message) {
-	name := m.Desc.Name()
-	columns := buildColumns(m)
-	constraints := buildConstraints(m)
+// buildMessage converts a protobuf message to a SQL table.
+func (sb *SchemaBuilder) buildMessage(protoMessage *protogen.Message) error {
+	if protoMessage == nil {
+		return ErrNilMessage
+	}
+
+	name := protoMessage.Desc.Name()
+
+	columns, err := buildColumns(protoMessage)
+	if err != nil {
+		return fmt.Errorf("building columns: %w", err)
+	}
+
+	constraints, err := buildConstraints(protoMessage)
+	if err != nil {
+		return fmt.Errorf("building constraints: %w", err)
+	}
+
 	table := core.Table{
 		Name:        string(name),
 		Columns:     columns,
@@ -76,158 +140,292 @@ func (sb *SchemaBuilder) BuildMessage(m *protogen.Message) {
 	}
 
 	sb.Schema.Tables = append(sb.Schema.Tables, table)
+
+	return nil
 }
 
-func buildColumns(m *protogen.Message) []core.Column {
-	var columns []core.Column
-	for _, field := range m.Fields {
-		c := &core.Column{
-			Name: string(field.Desc.Name()),
-			Type: mapDataType(field),
+// buildColumns converts protobuf message fields to SQL columns.
+func buildColumns(protoMessage *protogen.Message) ([]core.Column, error) {
+	if protoMessage == nil {
+		return nil, ErrNilMessage
+	}
+
+	columns := make([]core.Column, 0, len(protoMessage.Fields))
+
+	for _, field := range protoMessage.Fields {
+		columnType, err := mapDataType(field)
+		if err != nil {
+			slog.Warn("error mapping data type",
+				slog.String("field", string(field.Desc.Name())),
+				slog.String("error", err.Error()))
+
+			continue
 		}
-		getExtensions(field.Desc.Options(), c)
-		if c.DefaultValue != "" {
-			if c.Type != core.IntegerType && c.Type != core.FloatType && c.Type != core.BooleanType {
-				c.DefaultValue = fmt.Sprintf("'%v'", c.DefaultValue)
+
+		column := &core.Column{
+			Name: string(field.Desc.Name()),
+			Type: columnType,
+		}
+
+		if err := applyExtensions(field.Desc.Options(), column); err != nil {
+			slog.Warn("error applying extensions",
+				slog.String("field", string(field.Desc.Name())),
+				slog.String("error", err.Error()))
+		}
+
+		// Format default values appropriately based on type
+		if column.DefaultValue != "" {
+			if column.Type != core.IntegerType && column.Type != core.FloatType &&
+				column.Type != core.BooleanType {
+				column.DefaultValue = fmt.Sprintf("'%v'", column.DefaultValue)
 			}
 		}
 
-		columns = append(columns, *c)
+		columns = append(columns, *column)
 	}
-	return columns
+
+	return columns, nil
 }
 
-func getExtensions(opts protoreflect.ProtoMessage, c *core.Column) {
+// applyExtensions applies proto extensions to a column definition.
+func applyExtensions(opts protoreflect.ProtoMessage, column *core.Column) error {
+	if opts == nil {
+		return ErrNilOptions
+	}
+
+	if column == nil {
+		return errors.New("nil column provided")
+	}
+
+	// Apply SQLC field extensions
 	if proto.HasExtension(opts, sqlcpb.E_Field) {
 		ext, ok := proto.GetExtension(opts, sqlcpb.E_Field).(*sqlcpb.FieldConstraints)
-		if ok {
-			c.DefaultValue = ext.Default
-			c.NotNull = ext.Primary
+		if !ok {
+			slog.Warn("failed to get sqlc field extension")
+		} else {
+			column.DefaultValue = ext.GetDefault()
+			column.NotNull = ext.GetPrimary()
 		}
 	}
+
+	// Apply validate extensions
 	if proto.HasExtension(opts, validate.E_Field) {
 		ext, ok := proto.GetExtension(opts, validate.E_Field).(*validate.FieldConstraints)
-		if ok {
-			c.NotNull = c.NotNull || *ext.Required
-		}
-		if ext.GetString_().GetUuid() {
-			c.Type = core.UUIDType
+		if !ok {
+			slog.Warn("failed to get validate field extension")
+		} else {
+			column.NotNull = column.NotNull || ext.GetRequired()
+
+			// Check for UUID type
+			stringRules := ext.GetString_()
+			if stringRules != nil && stringRules.GetUuid() {
+				column.Type = core.UUIDType
+			}
 		}
 	}
+
+	return nil
 }
 
-func buildConstraints(m *protogen.Message) []core.Constraint {
+// buildConstraints extracts SQL constraints from protobuf message fields.
+func buildConstraints(protoMessage *protogen.Message) ([]core.Constraint, error) {
+	if protoMessage == nil {
+		return nil, ErrNilMessage
+	}
+
 	var constraints []core.Constraint
-	for _, field := range m.Fields {
+
+	for _, field := range protoMessage.Fields {
 		opts := field.Desc.Options()
 		if !proto.HasExtension(opts, sqlcpb.E_Field) {
 			continue
 		}
+
 		ext, ok := proto.GetExtension(opts, sqlcpb.E_Field).(*sqlcpb.FieldConstraints)
 		if !ok {
+			slog.Warn(
+				"invalid extension type for field",
+				slog.String("field", string(field.Desc.Name())),
+			)
+
 			continue
 		}
-		if ext.Unique {
+
+		fieldName := string(field.Desc.Name())
+
+		// Handle unique constraint
+		if ext.GetUnique() {
 			constraints = append(constraints, core.Constraint{
 				Type:    core.UniqueConstraint,
-				Columns: []string{string(field.Desc.Name())},
+				Columns: []string{fieldName},
 			})
 		}
-		if ext.Primary {
+
+		// Handle primary key constraint
+		if ext.GetPrimary() {
 			constraints = append(constraints, core.Constraint{
 				Type:    core.PrimaryKeyConstraint,
-				Columns: []string{string(field.Desc.Name())},
+				Columns: []string{fieldName},
 			})
 		}
-		if ext.References != "" {
-			parts := strings.Split(ext.References, ".")
+
+		// Handle foreign key constraint
+		if ref := ext.GetReferences(); ref != "" {
+			parts := strings.Split(ref, ".")
+			if len(parts) != referencesPartCount {
+				slog.Warn("invalid references format", slog.String("value", ref))
+
+				continue
+			}
+
 			constraints = append(constraints, core.Constraint{
 				Type:    core.ForeignKeyConstraint,
-				Columns: []string{string(field.Desc.Name())},
+				Columns: []string{fieldName},
 				References: &core.Reference{
 					Table:    parts[0],
 					Columns:  []string{parts[1]},
-					OnDelete: "CASCADE",
+					OnDelete: core.ForeignKeyActionNoAction,
+					OnUpdate: core.ForeignKeyActionNoAction,
 				},
 			})
 		}
 	}
-	return constraints
+
+	return constraints, nil
 }
 
-//nolint:cyclop // not much we can do to avoid this
-func mapDataType(field *protogen.Field) core.ColumnType {
-	var t core.ColumnType
-	//nolint:exhaustive // not every type is relevant
+// mapDataType converts protobuf field types to SQL column types.
+func mapDataType(field *protogen.Field) (core.ColumnType, error) {
+	if field == nil {
+		return "", errors.New("nil field provided")
+	}
+
 	switch field.Desc.Kind() {
 	case protoreflect.BoolKind:
-		t = core.BooleanType
+		return core.BooleanType, nil
 	case protoreflect.BytesKind:
-		t = core.BytesType
+		return core.BytesType, nil
 	case protoreflect.FloatKind, protoreflect.DoubleKind:
-		t = core.FloatType
+		return core.FloatType, nil
 	case protoreflect.StringKind:
-		if field.Desc.Cardinality() == protoreflect.Repeated {
-			t = core.TextArrayType
-		} else {
-			t = core.TextType
-		}
+		return mapStringType(field)
 	case protoreflect.Fixed32Kind, protoreflect.Fixed64Kind,
 		protoreflect.Int32Kind, protoreflect.Int64Kind,
 		protoreflect.Sfixed32Kind, protoreflect.Sfixed64Kind,
 		protoreflect.Sint32Kind, protoreflect.Sint64Kind,
 		protoreflect.Uint32Kind, protoreflect.Uint64Kind:
-		t = core.IntegerType
+		return core.IntegerType, nil
 	case protoreflect.EnumKind:
-		t = core.ColumnType(field.Enum.Desc.Name())
-	case protoreflect.MessageKind:
-		switch field.Message.Desc.FullName() {
-		case "google.protobuf.Timestamp":
-			t = core.TimestampType
-		case "google.protobuf.Struct":
-			t = core.JSONBType
-		}
+		return core.ColumnType(field.Enum.Desc.Name()), nil
+	case protoreflect.MessageKind, protoreflect.GroupKind:
+		return mapMessageType(field)
 	default:
-		t = core.BytesType
+		return core.BytesType, nil
 	}
-
-	return t
 }
 
-func GenerateSchema(p *protogen.Plugin, s core.Schema, opts template.Options) {
+func mapStringType(field *protogen.Field) (core.ColumnType, error) {
+	if field.Desc.Cardinality() == protoreflect.Repeated {
+		return core.TextArrayType, nil
+	}
+
+	return core.TextType, nil
+}
+
+func mapMessageType(field *protogen.Field) (core.ColumnType, error) {
+	if field.Message == nil || field.Message.Desc == nil {
+		return "", errors.New("message field has nil descriptor")
+	}
+
+	switch field.Message.Desc.FullName() {
+	case "google.protobuf.Timestamp":
+		return core.TimestampType, nil
+	case "google.protobuf.Struct":
+		return core.JSONBType, nil
+	default:
+		return core.BytesType, nil
+	}
+}
+
+// GenerateSchema creates a SQL schema file from the accumulated schema definition.
+func GenerateSchema(
+	p *protogen.Plugin,
+	schema core.Schema,
+	tmpl *template.Templates,
+	opts template.Options,
+) error {
+	if p == nil {
+		return errors.New("nil plugin provided")
+	}
+
 	slog.Debug("generating schema.sql")
+
 	gf := p.NewGeneratedFile("schema.sql", "")
 
-	err := template.ApplySchema(gf, template.SchemaParams{
-		Schema:       s,
+	err := tmpl.ApplySchema(gf, &template.SchemaParams{
+		Schema:       schema,
 		Options:      opts,
 		HeaderParams: template.HeaderParams{},
 	})
 	if err != nil {
 		gf.Skip()
 		p.Error(err)
+
+		return fmt.Errorf("applying schema template: %w", err)
 	}
+
+	return nil
 }
 
-func GenerateQueries(p *protogen.Plugin, s core.Schema, opts template.Options) {
-	for message, f := range FilesByMessage {
-		name := *f.Proto.Name
-		slog.Debug("processing queries for file", slog.String("name", name))
-		slog.Debug("generating queries in", slog.String("name", fmt.Sprintf("%s.sql", f.GeneratedFilenamePrefix)))
-		gf := p.NewGeneratedFile(fmt.Sprintf("%s.sql", f.GeneratedFilenamePrefix), f.GoImportPath)
+// GenerateQueries creates SQL query files for each message in the schema.
+func GenerateQueries(
+	p *protogen.Plugin,
+	schema core.Schema,
+	filesByMessage map[string]*protogen.File,
+	tmpl *template.Templates,
+	opts template.Options,
+) error {
+	if p == nil {
+		return errors.New("nil plugin provided")
+	}
 
-		table := *s.TableByName(message)
-		err := template.ApplyCrud(gf, template.CrudParams{
+	for message, protoFile := range filesByMessage {
+		if protoFile == nil {
+			slog.Warn("nil proto file for message", slog.String("message", message))
+
+			continue
+		}
+
+		name := protoFile.Proto.GetName()
+		slog.Debug("processing queries for file", slog.String("name", name))
+		slog.Debug(
+			"generating queries in",
+			slog.String("name", protoFile.GeneratedFilenamePrefix+".sql"),
+		)
+
+		gf := p.NewGeneratedFile(protoFile.GeneratedFilenamePrefix+".sql", protoFile.GoImportPath)
+
+		table := schema.TableByName(message)
+		if table == nil {
+			slog.Warn("table not found for message", slog.String("message", message))
+
+			continue
+		}
+
+		err := tmpl.ApplyCrud(gf, &template.CrudParams{
 			GoName:       message,
 			PrimaryKey:   table.PrimaryKey(),
-			Table:        table,
+			Table:        *table,
 			Options:      opts,
-			HeaderParams: template.HeaderParams{Sources: []string{*f.Proto.Name}},
+			HeaderParams: template.HeaderParams{Sources: []string{protoFile.Proto.GetName()}},
 		})
 		if err != nil {
 			gf.Skip()
 			p.Error(err)
+
 			continue
 		}
 	}
+
+	return nil
 }

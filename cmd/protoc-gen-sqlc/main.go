@@ -7,10 +7,11 @@ package main
 import (
 	"flag"
 
-	"github.com/pablojimpas/protoc-gen-sqlc/internal/converter"
-	"github.com/pablojimpas/protoc-gen-sqlc/internal/sqlc/template"
 	"google.golang.org/protobuf/compiler/protogen"
 	"google.golang.org/protobuf/types/pluginpb"
+
+	"github.com/pablojimpas/protoc-gen-sqlc/internal/converter"
+	"github.com/pablojimpas/protoc-gen-sqlc/internal/sqlc/template"
 )
 
 func main() {
@@ -19,11 +20,22 @@ func main() {
 	}.Run(
 		func(p *protogen.Plugin) error {
 			p.SupportedFeatures = uint64(pluginpb.CodeGeneratorResponse_FEATURE_PROTO3_OPTIONAL)
+			tmpl := template.New()
 			opts := template.Options{}
 			sb := converter.NewSchemaBuilder()
-			sb.Build(p)
-			converter.GenerateSchema(p, sb.Schema, opts)
-			converter.GenerateQueries(p, sb.Schema, opts)
+
+			if err := sb.Build(p); err != nil {
+				return err
+			}
+
+			if err := converter.GenerateSchema(p, sb.Schema, tmpl, opts); err != nil {
+				return err
+			}
+
+			if err := converter.GenerateQueries(p, sb.Schema, sb.FilesByMessage, tmpl, opts); err != nil {
+				return err
+			}
+
 			return nil
 		},
 	)
