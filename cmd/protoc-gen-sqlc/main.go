@@ -32,7 +32,13 @@ func main() {
 				return err
 			}
 
-			if err := converter.GenerateQueries(p, sb.Schema, sb.FilesByMessage, tmpl, opts); err != nil {
+			if err := converter.GenerateQueries(
+				p,
+				sb.Schema,
+				sb.FilesByMessage,
+				tmpl,
+				opts,
+			); err != nil {
 				return err
 			}
 

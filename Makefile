@@ -7,10 +7,10 @@ BINARY_NAME=protoc-gen-sqlc
 LIBRARY_EXAMPLE_PATH=examples/library
 LIBRARY_EXAMPLE_CONFIG=buf.gen.yaml
 
-BUF_VERSION=v1.51.0
-SQLC_VERSION=v1.28.0
-GOLANGCILINT_VERSION=v2.0.2
-PROTOC_GEN_GO_VERSION=v1.36.6
+BUF_VERSION=v1.68.4
+SQLC_VERSION=v1.31.1
+GOLANGCILINT_VERSION=v2.11.4
+PROTOC_GEN_GO_VERSION=v1.36.11
 
 .PHONY: help
 help:
@@ -25,7 +25,7 @@ no-dirty:
 .PHONY: format
 format:
 	go fmt ./...
-	go run mvdan.cc/gofumpt@latest -w cmd internal
+	go run github.com/golangci/golangci-lint/v2/cmd/golangci-lint@$(GOLANGCILINT_VERSION) fmt ./...
 
 .PHONY: tidy
 tidy: format

@@ -210,7 +210,7 @@ func applyExtensions(opts protoreflect.ProtoMessage, column *core.Column) error 
 
 	// Apply validate extensions
 	if proto.HasExtension(opts, validate.E_Field) {
-		ext, ok := proto.GetExtension(opts, validate.E_Field).(*validate.FieldConstraints)
+		ext, ok := proto.GetExtension(opts, validate.E_Field).(*validate.FieldRules)
 		if !ok {
 			slog.Warn("failed to get validate field extension")
 		} else {
