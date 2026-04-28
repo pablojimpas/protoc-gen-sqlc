@@ -10,6 +10,8 @@ updates:
     groups:
       all:
         update-types: ["patch", "minor", "major"]
+    cooldown:
+      default-days: 7
 
   - package-ecosystem: "gomod"
     directory: "/"
@@ -21,3 +23,5 @@ updates:
     groups:
       safe:
         update-types: ["patch", "minor"]
+    cooldown:
+      default-days: 7
