@@ -6,6 +6,12 @@ on:
       - master
     paths:
       - "**.go"
+      - "**/*.tmpl"
+      - "**/*.proto"
+      - "**/*.sql"
+      - "**/buf*.yaml"
+      - "buf.lock"
+      - "**/sqlc.yaml"
       - "go.mod"
       - "go.sum"
       - ".golangci.yml"
@@ -16,6 +22,12 @@ on:
       - master
     paths:
       - "**.go"
+      - "**/*.tmpl"
+      - "**/*.proto"
+      - "**/*.sql"
+      - "**/buf*.yaml"
+      - "buf.lock"
+      - "**/sqlc.yaml"
       - "go.mod"
       - "go.sum"
       - ".golangci.yml"
