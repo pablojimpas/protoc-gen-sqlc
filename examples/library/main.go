@@ -7,6 +7,7 @@ package main
 import (
 	"context"
 	"embed"
+	"errors"
 	"fmt"
 	"io/fs"
 	"log"
@@ -14,6 +15,7 @@ import (
 	"time"
 
 	"github.com/jackc/pgx/v5"
+	"github.com/jackc/pgx/v5/pgconn"
 	"github.com/jackc/pgx/v5/pgtype"
 
 	example "github.com/pablojimpas/protoc-gen-sqlc/examples/library/internal/gen/sqlc"
@@ -89,7 +91,7 @@ func run() error {
 	log.Println("Inserted Author == Fetched Author:")
 	log.Println(reflect.DeepEqual(insertedAuthor, fetchedAuthor))
 
-	book, _ := queries.CreateBook(ctx, example.CreateBookParams{
+	book, err := queries.CreateBook(ctx, example.CreateBookParams{
 		BookID:        1,
 		AuthorID:      fetchedAuthor.AuthorID,
 		Isbn:          "ABC123",
@@ -102,6 +104,10 @@ func run() error {
 		Price:         pgtype.Float8{Float64: 19.99, Valid: true},
 	})
 
+	if err != nil {
+		return fmt.Errorf("create book: %w", err)
+	}
+
 	log.Println("Inserted book")
 	log.Println(book)
 
@@ -109,8 +115,13 @@ func run() error {
 		return err
 	}
 
-	if err = queries.DeleteAuthor(ctx, insertedAuthor.AuthorID); err != nil {
-		return nil
+	err = queries.DeleteAuthor(ctx, insertedAuthor.AuthorID)
+	if err == nil {
+		return errors.New("deleted an author still referenced by a book")
+	}
+	var pgErr *pgconn.PgError
+	if !errors.As(err, &pgErr) || pgErr.Code != "23503" {
+		return fmt.Errorf("expected a foreign key violation deleting the author: %w", err)
 	}
 
 	return nil
