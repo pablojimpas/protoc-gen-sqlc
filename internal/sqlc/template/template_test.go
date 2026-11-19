@@ -12,13 +12,18 @@ import (
 	"github.com/pablojimpas/protoc-gen-sqlc/internal/sqlc/template"
 )
 
+const (
+	authorsTable   = "authors"
+	authorIDColumn = "author_id"
+)
+
 func TestApplySchemaTemplate(t *testing.T) {
 	t.Parallel()
 
 	schema := core.Schema{
 		Tables: []core.Table{
 			{
-				Name: "authors",
+				Name: authorsTable,
 				Columns: []core.Column{
 					{Name: "id", Type: core.SerialType, NotNull: true},
 					{Name: "name", Type: core.TextType, NotNull: true},
@@ -33,14 +38,14 @@ func TestApplySchemaTemplate(t *testing.T) {
 				Columns: []core.Column{
 					{Name: "id", Type: core.SerialType, NotNull: true},
 					{Name: "title", Type: core.TextType, NotNull: true},
-					{Name: "author_id", Type: core.IntegerType, NotNull: true},
+					{Name: authorIDColumn, Type: core.IntegerType, NotNull: true},
 				},
 				Constraints: []core.Constraint{
 					{Type: core.PrimaryKeyConstraint, Columns: []string{"id"}},
 					{
 						Type:       core.ForeignKeyConstraint,
-						Columns:    []string{"author_id"},
-						References: &core.Reference{Table: "authors", Columns: []string{"id"}},
+						Columns:    []string{authorIDColumn},
+						References: &core.Reference{Table: authorsTable, Columns: []string{"id"}},
 					},
 				},
 			},
@@ -68,14 +73,14 @@ func TestApplyCrudTemplate(t *testing.T) {
 		Columns: []core.Column{
 			{Name: "id", Type: core.SerialType, NotNull: true},
 			{Name: "title", Type: core.TextType, NotNull: true},
-			{Name: "author_id", Type: core.IntegerType, NotNull: true},
+			{Name: authorIDColumn, Type: core.IntegerType, NotNull: true},
 		},
 		Constraints: []core.Constraint{
 			{Type: core.PrimaryKeyConstraint, Columns: []string{"id"}},
 			{
 				Type:       core.ForeignKeyConstraint,
-				Columns:    []string{"author_id"},
-				References: &core.Reference{Table: "authors", Columns: []string{"id"}},
+				Columns:    []string{authorIDColumn},
+				References: &core.Reference{Table: authorsTable, Columns: []string{"id"}},
 			},
 		},
 	}

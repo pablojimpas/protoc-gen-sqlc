@@ -25,7 +25,9 @@ formatters:
         - localmodule
     gofumpt:
       module-path: github.com/pablojimpas/protoc-gen-sqlc
-      extra-rules: true
+      extra:
+        group-params: true
+        clothe-returns: true
 
 linters:
   default: none

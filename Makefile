@@ -9,7 +9,7 @@ LIBRARY_EXAMPLE_CONFIG=buf.gen.yaml
 
 BUF_VERSION=v1.75.0
 SQLC_VERSION=v1.31.1
-GOLANGCILINT_VERSION=v2.11.4
+GOLANGCILINT_VERSION=v2.15.0
 PROTOC_GEN_GO_VERSION=v1.36.12
 
 .PHONY: help
@@ -37,7 +37,7 @@ audit: tidy
 	go mod verify
 	go vet ./...
 	go test -v -race -failfast -buildvcs -vet=off ./...
-	go run golang.org/x/vuln/cmd/govulncheck@latest ./...
+	go run golang.org/x/vuln/cmd/govulncheck@v1.10.0 ./...
 	go run github.com/golangci/golangci-lint/v2/cmd/golangci-lint@$(GOLANGCILINT_VERSION) run ./...
 	go run github.com/bufbuild/buf/cmd/buf@$(BUF_VERSION) lint
 
