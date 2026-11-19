@@ -2,8 +2,8 @@
 version: v2
 deps:
   - name: buf.build/bufbuild/protovalidate
-    commit: a3320276596649bcad929ac829d451f4
-    digest: b5:285a6d3a423b195a21f45aacc97ee222ac09cfb01a42f0d546aa51d92177b0b9d00eb9ae93e72dabbbefdc77f35a4c7a11f15d913cc08da764fcb6071f85d148
+    commit: 511051f7f4374c3ca873b53ae68a9288
+    digest: b5:a4a2d4d808a25984cced60769c822c5d496ef0b740f56ac0c9e6b97aaa25b86a9332a00ffd74e0cd202be29e91bd3edfb0bf2ba4dacfe48ff2d8217f9986e3c8
   - name: buf.build/protocolbuffers/wellknowntypes
-    commit: d59b7d45e69d4e129a1b797e2766f067
-    digest: b5:79d98c29b4fadd41adba4396b9c628daf2db955f7a2cbd8dd00fb21911b31463948b1d2ba4ba202fad034eec23dbf9f56ea3c8dcef5f88e5b85111eadae88359
+    commit: f1151727eddb493abf82a1d919dc35e4
+    digest: b5:e05c29a4347e1ef07cb978e9ece8a44c59c8cb6ff31884cd632f88266f81baaba7a67bcfc6ac52d8caada7f77faf2d37683af0d69755ef52d9f1288cd1fd5d93
