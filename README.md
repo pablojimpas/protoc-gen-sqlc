@@ -9,6 +9,23 @@ Protocol Buffers plugin to generate SQL schema and queries with
 
 ## Why?
 
+Describe a library book and its author in Protobuf, mark their keys and
+relationship, and inspect the resulting tables and queries before compiling
+them into typed application code with sqlc. The
+[library definitions](proto/examples/library/v1) and
+[generated SQL](examples/library/internal/gen/pb/sqlc) show both sides of
+that contract.
+
+This is an experimental generator. The included example targets PostgreSQL
+and Go with pgx. It generates a schema for an empty database and named CRUD
+queries. Existing databases need a migration plan when the schema changes.
+The generator currently treats every top-level message in its input as a
+table. Limit generation to files containing persistence models.
+
+From a checkout with Go and the Go binary directory on your PATH, run
+`make sqlc` to rebuild the plugin and regenerate the library SQL and Go
+bindings. Run `make test` to exercise the Go test suite.
+
 ## Install
 
 You can download and compile the latest version from source using Go directly:
