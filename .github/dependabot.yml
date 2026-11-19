@@ -25,3 +25,8 @@ updates:
         update-types: ["patch", "minor"]
     cooldown:
       default-days: 7
+
+  - package-ecosystem: "docker-compose"
+    directory: "/examples/library"
+    schedule:
+      interval: "weekly"
